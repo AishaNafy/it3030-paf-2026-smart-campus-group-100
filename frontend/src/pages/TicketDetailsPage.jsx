@@ -53,104 +53,235 @@ const TicketDetailsPage = () => {
     }
   };
 
-  // ✅ PDF DOWNLOAD FUNCTION
+  // ✅ PDF DOWNLOAD FUNCTION - PROFESSIONAL & CREATIVE
   const handleDownloadPDF = () => {
     const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    let y = 10;
+    let y = 15;
 
-    // Title
-    pdf.setFontSize(18);
-    pdf.text("Ticket Details Report", 14, y);
+    // ========== HEADER SECTION ==========
+    // Background color for header
+    pdf.setFillColor(15, 23, 42); // Dark slate blue
+    pdf.rect(0, 0, pageWidth, 30, 'F');
 
-    y += 10;
+    // Header Title
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(22);
+    pdf.setFont(undefined, 'bold');
+    pdf.text("TICKET DETAILS REPORT", 14, 12);
 
-    // Ticket Info
-    pdf.setFontSize(12);
-    pdf.text(`Ticket ID: ${id}`, 14, y);
-    y += 8;
+    // Header Subtitle
+    pdf.setFontSize(9);
+    pdf.setFont(undefined, 'normal');
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 14, 22);
 
-    pdf.text(`Title: ${ticket.title}`, 14, y);
-    y += 8;
+    y = 45;
 
-    pdf.text(`Category: ${ticket.category}`, 14, y);
-    y += 8;
+    // ========== TICKET ID & STATUS BANNER ==========
+    pdf.setFillColor(59, 130, 246); // Blue
+    pdf.rect(14, y - 5, pageWidth - 28, 12, 'F');
 
-    pdf.text(`Priority: ${ticket.priority}`, 14, y);
-    y += 8;
-
-    pdf.text(`Status: ${ticket.status}`, 14, y);
-    y += 8;
-
-    pdf.text(`Created By: ${ticket.createdBy}`, 14, y);
-    y += 8;
-
-    pdf.text(`Created At: ${new Date(ticket.createdAt).toLocaleString()}`, 14, y);
-    y += 10;
-
-    // Contact Info
-    if (ticket.email) {
-      pdf.text(`Email: ${ticket.email}`, 14, y);
-      y += 8;
-    }
-
-    if (ticket.phoneNumber) {
-      pdf.text(`Phone: ${ticket.phoneNumber}`, 14, y);
-      y += 8;
-    }
-
-    if (ticket.incidentDate) {
-      pdf.text(`Incident Date: ${ticket.incidentDate}`, 14, y);
-      y += 10;
-    }
-
-    // Description
-    pdf.setFontSize(14);
-    pdf.text("Description:", 14, y);
-    y += 8;
-
+    pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(11);
-    const descLines = pdf.splitTextToSize(ticket.description, 180);
-    pdf.text(descLines, 14, y);
-    y += descLines.length * 6;
+    pdf.setFont(undefined, 'bold');
+    pdf.text(`#${id}`, 16, y + 2);
 
-    // Resolution
-    if (ticket.resolutionNotes) {
-      y += 10;
-      pdf.setFontSize(14);
-      pdf.text("Resolution Notes:", 14, y);
-      y += 8;
+    // Priority & Status badges
+    const statusColor = ticket.status === 'resolved' ? [34, 197, 94] : ticket.status === 'in-progress' ? [251, 146, 60] : [156, 163, 175];
+    pdf.setFillColor(...statusColor);
+    pdf.rect(pageWidth - 60, y - 5, 25, 12, 'F');
+    pdf.setFontSize(9);
+    pdf.text(ticket.status.toUpperCase(), pageWidth - 55, y + 2);
 
-      pdf.setFontSize(11);
-      const resLines = pdf.splitTextToSize(ticket.resolutionNotes, 180);
-      pdf.text(resLines, 14, y);
-      y += resLines.length * 6;
+    pdf.setFillColor(168, 85, 247); // Purple for priority
+    pdf.rect(pageWidth - 32, y - 5, 25, 12, 'F');
+    pdf.text(ticket.priority.toUpperCase(), pageWidth - 28, y + 2);
+
+    y += 25;
+
+    // ========== TICKET INFORMATION GRID ==========
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+    pdf.setFont(undefined, 'bold');
+    pdf.setFillColor(229, 231, 235); // Light gray background
+    pdf.rect(14, y - 5, pageWidth - 28, 8, 'F');
+    pdf.text("TICKET INFORMATION", 16, y);
+
+    y += 12;
+
+    // Two-column layout for info
+    const col1X = 16;
+    const col2X = pageWidth / 2 + 5;
+    pdf.setFontSize(9);
+    pdf.setFont(undefined, 'normal');
+
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(51, 65, 85);
+    pdf.text("Title:", col1X, y);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(0, 0, 0);
+    const titleLines = pdf.splitTextToSize(ticket.title, 60);
+    pdf.text(titleLines, col1X + 20, y);
+    y += titleLines.length * 5 + 3;
+
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(51, 65, 85);
+    pdf.text("Category:", col1X, y);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(ticket.category, col1X + 20, y);
+    y += 6;
+
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(51, 65, 85);
+    pdf.text("Created By:", col1X, y);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(ticket.createdBy, col1X + 20, y);
+    y += 6;
+
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(51, 65, 85);
+    pdf.text("Created At:", col1X, y);
+    pdf.setFont(undefined, 'normal');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(new Date(ticket.createdAt).toLocaleString(), col1X + 20, y);
+    y += 12;
+
+    // ========== CONTACT INFORMATION ==========
+    if (ticket.email || ticket.phoneNumber || ticket.incidentDate) {
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFillColor(107, 114, 128); // Gray
+      pdf.rect(14, y - 5, pageWidth - 28, 8, 'F');
+      pdf.text("CONTACT & INCIDENT DETAILS", 16, y);
+
+      y += 12;
+
+      pdf.setFont(undefined, 'normal');
+      pdf.setTextColor(0, 0, 0);
+
+      if (ticket.email) {
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text("Email:", col1X, y);
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(ticket.email, col1X + 20, y);
+        y += 6;
+      }
+
+      if (ticket.phoneNumber) {
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text("Phone:", col1X, y);
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(ticket.phoneNumber, col1X + 20, y);
+        y += 6;
+      }
+
+      if (ticket.incidentDate) {
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text("Incident Date:", col1X, y);
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(ticket.incidentDate, col1X + 20, y);
+        y += 8;
+      }
     }
 
-    // Comments
-    if (comments.length > 0) {
-      y += 10;
-      pdf.setFontSize(14);
-      pdf.text("Comments:", 14, y);
-      y += 8;
+    y += 5;
 
-      pdf.setFontSize(11);
+    // ========== DESCRIPTION ==========
+    pdf.setFont(undefined, 'bold');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFillColor(15, 23, 42); // Dark slate
+    pdf.rect(14, y - 5, pageWidth - 28, 8, 'F');
+    pdf.setFontSize(10);
+    pdf.text("DESCRIPTION", 16, y);
+
+    y += 10;
+
+    pdf.setFont(undefined, 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(0, 0, 0);
+    const descLines = pdf.splitTextToSize(ticket.description, 180);
+    pdf.text(descLines, 16, y);
+    y += descLines.length * 5 + 5;
+
+    // ========== RESOLUTION NOTES ==========
+    if (ticket.resolutionNotes) {
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFillColor(34, 197, 94); // Green
+      pdf.rect(14, y - 5, pageWidth - 28, 8, 'F');
+      pdf.setFontSize(10);
+      pdf.text("RESOLUTION NOTES", 16, y);
+
+      y += 10;
+
+      pdf.setFont(undefined, 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(0, 0, 0);
+      const resLines = pdf.splitTextToSize(ticket.resolutionNotes, 180);
+      pdf.text(resLines, 16, y);
+      y += resLines.length * 5 + 5;
+    }
+
+    // ========== COMMENTS SECTION ==========
+    if (comments.length > 0) {
+      if (y > 250) {
+        pdf.addPage();
+        y = 15;
+      }
+
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFillColor(99, 102, 241); // Indigo
+      pdf.rect(14, y - 5, pageWidth - 28, 8, 'F');
+      pdf.setFontSize(10);
+      pdf.text(`COMMENTS (${comments.length})`, 16, y);
+
+      y += 12;
+
+      pdf.setFontSize(8);
 
       comments.forEach((c, index) => {
-        const commentText = `${c.author} (${new Date(c.createdAt).toLocaleString()}): ${c.content}`;
-        const lines = pdf.splitTextToSize(commentText, 180);
-
-        if (y + lines.length * 6 > 280) {
+        if (y > 270) {
           pdf.addPage();
-          y = 10;
+          y = 15;
         }
 
-        pdf.text(lines, 14, y);
-        y += lines.length * 6 + 4;
+        // Comment box background
+        pdf.setFillColor(244, 245, 247);
+        pdf.rect(14, y - 4, pageWidth - 28, 1, 'F');
+
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text(`${c.author} • ${new Date(c.createdAt).toLocaleString()}`, 16, y);
+
+        y += 5;
+
+        pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(31, 41, 55);
+        const commentLines = pdf.splitTextToSize(c.content, 175);
+        pdf.text(commentLines, 18, y);
+        y += commentLines.length * 4 + 5;
       });
     }
 
-    // Save
+    // ========== FOOTER ==========
+    const footerY = pageHeight - 10;
+    pdf.setFontSize(8);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text(`Smart Campus Ticketing System • Page ${pdf.internal.getCurrentPageInfo().pageNumber}`, 14, footerY);
+    pdf.text(`Confidential - For Official Use Only`, pageWidth - 60, footerY);
+
+    // Save PDF
     pdf.save(`ticket-${id}.pdf`);
   };
 
