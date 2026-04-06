@@ -47,7 +47,7 @@ smart-campus/
 cd path/to/project/backend
 
 Verify MongoDB configuration in backend/src/main/resources/application.properties
-spring.data.mongodb.uri=mongodb+srv://aisha:1234@cluster0.ry1wmxf.mongodb.net/smartcampus_db
+spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.ry1wmxf.mongodb.net/smartcampus_db
 
 mvn clean install
 mvn spring-boot:run
