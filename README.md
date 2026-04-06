@@ -46,13 +46,12 @@ smart-campus/
 
 cd path/to/project/backend
 
-# Verify MongoDB configuration in backend/src/main/resources/application.properties
-# Example:
-# spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.qeyf8hi.mongodb.net/ticketdb?appName=Cluster0
+Verify MongoDB configuration in backend/src/main/resources/application.properties
+spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.qeyf8hi.mongodb.net/ticketdb?appName=Cluster0
 
 mvn clean install
 mvn spring-boot:run
-# Backend runs at http://localhost:8080, uploads/ folder created automatically
+Backend runs at http://localhost:8080, uploads/ folder created automatically
 
 ---
 
@@ -61,7 +60,7 @@ mvn spring-boot:run
 cd path/to/project/frontend
 npm install
 npm start
-# Frontend runs at http://localhost:3000
+Frontend runs at http://localhost:3000
 
 ---
 
