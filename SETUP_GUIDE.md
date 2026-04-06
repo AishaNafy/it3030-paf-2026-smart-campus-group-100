@@ -43,7 +43,7 @@ The project repository is split into two primary applications:
    Open `backend/src/main/resources/application.properties`. Ensure the MongoDB connection string points to your valid cluster.
    ```properties
    # It is currently set to your cloud cluster
-   spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.qeyf8hi.mongodb.net/ticketdb?appName=Cluster0
+   spring.data.mongodb.uri=mongodb+srv://aisha:1234@cluster0.ry1wmxf.mongodb.net/smartcampus_db
    ```
 
 3. **Install Dependencies and Clean the Project:**
