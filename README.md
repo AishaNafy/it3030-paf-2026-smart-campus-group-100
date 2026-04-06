@@ -1,4 +1,3 @@
-echo "
 # Smart Campus Operations Hub
 
 Full-stack university project for IT3030 PAF 2026.
