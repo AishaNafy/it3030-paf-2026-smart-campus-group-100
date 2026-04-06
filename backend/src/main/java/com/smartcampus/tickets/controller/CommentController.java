@@ -1,7 +1,7 @@
-package com.smartcampus.controller;
+package com.smartcampus.tickets.controller;
 
-import com.smartcampus.model.Comment;
-import com.smartcampus.service.CommentService;
+import com.smartcampus.tickets.model.Comment;
+import com.smartcampus.tickets.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
-package com.smartcampus.controller;
+package com.smartcampus.tickets.controller;
 
-import com.smartcampus.model.Ticket;
-import com.smartcampus.service.FileStorageService;
-import com.smartcampus.service.TicketService;
+import com.smartcampus.tickets.model.Ticket;
+import com.smartcampus.tickets.service.FileStorageService;
+import com.smartcampus.tickets.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

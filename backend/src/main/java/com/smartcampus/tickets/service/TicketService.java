@@ -1,7 +1,7 @@
-package com.smartcampus.service;
+package com.smartcampus.tickets.service;
 
-import com.smartcampus.model.Ticket;
-import com.smartcampus.repository.TicketRepository;
+import com.smartcampus.tickets.model.Ticket;
+import com.smartcampus.tickets.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

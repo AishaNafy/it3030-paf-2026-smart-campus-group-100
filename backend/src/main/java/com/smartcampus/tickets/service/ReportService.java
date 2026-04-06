@@ -1,6 +1,6 @@
-package com.smartcampus.service;
+package com.smartcampus.tickets.service;
 
-import com.smartcampus.model.Ticket;
+import com.smartcampus.tickets.model.Ticket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;

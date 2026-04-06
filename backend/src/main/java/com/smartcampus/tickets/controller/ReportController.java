@@ -1,6 +1,6 @@
-package com.smartcampus.controller;
+package com.smartcampus.tickets.controller;
 
-import com.smartcampus.service.ReportService;
+import com.smartcampus.tickets.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

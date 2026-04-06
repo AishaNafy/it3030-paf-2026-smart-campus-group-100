@@ -1,4 +1,4 @@
-package com.smartcampus.model;
+package com.smartcampus.tickets.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

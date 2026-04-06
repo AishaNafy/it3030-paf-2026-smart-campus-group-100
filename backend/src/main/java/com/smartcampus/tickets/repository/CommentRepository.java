@@ -1,6 +1,6 @@
-package com.smartcampus.repository;
+package com.smartcampus.tickets.repository;
 
-import com.smartcampus.model.Comment;
+import com.smartcampus.tickets.model.Comment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

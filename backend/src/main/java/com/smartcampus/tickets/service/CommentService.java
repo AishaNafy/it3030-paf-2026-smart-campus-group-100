@@ -1,7 +1,7 @@
-package com.smartcampus.service;
+package com.smartcampus.tickets.service;
 
-import com.smartcampus.model.Comment;
-import com.smartcampus.repository.CommentRepository;
+import com.smartcampus.tickets.model.Comment;
+import com.smartcampus.tickets.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
