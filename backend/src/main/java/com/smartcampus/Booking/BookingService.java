@@ -18,22 +18,11 @@ public class BookingService {
     // ── CREATE ──────────────────────────────────────────────────────
 
     public Booking createBooking(Booking booking) {
-
-        if (booking.getStudentId() == null || booking.getStudentId().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student ID is required.");
-        if (booking.getLocation() == null || booking.getLocation().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location is required.");
-        if (booking.getDate() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required.");
-        if (booking.getStartTime() == null || booking.getEndTime() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start and end time are required.");
-        if (!booking.getEndTime().isAfter(booking.getStartTime()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time must be after start time.");
-
-        // Conflict check (exclude self — not needed for create but kept consistent)
-        checkConflict(booking.getLocation().trim(), booking.getDate(),
+        validateFields(booking);
+        checkConflict(booking.getLocation(), booking.getDate(),
                       booking.getStartTime(), booking.getEndTime(), null);
 
+        booking.setStudentId(booking.getStudentId().trim().toUpperCase());
         booking.setId(sequenceGenerator.generateAvailableId());
         booking.setStatus("PENDING");
         booking.setCreatedAt(LocalDateTime.now());
@@ -54,36 +43,14 @@ public class BookingService {
                         "Booking " + id + " not found."));
     }
 
-    // ── EDIT (update booking details) ────────────────────────────────
+    // ── EDIT ─────────────────────────────────────────────────────────
 
-    /**
-     * Allows editing of any booking's details (location, date, times, purpose,
-     * attendees, studentId). Resets status to PENDING after edit so admin
-     * re-reviews the updated request.
-     * Also re-runs conflict check, excluding the booking being edited.
-     */
     public Booking updateBooking(String id, Booking updated) {
         Booking existing = getBookingById(id);
-
-        // Validate incoming fields
-        if (updated.getStudentId() == null || updated.getStudentId().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student ID is required.");
-        if (updated.getLocation() == null || updated.getLocation().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location is required.");
-        if (updated.getDate() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required.");
-        if (updated.getStartTime() == null || updated.getEndTime() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start and end time are required.");
-        if (!updated.getEndTime().isAfter(updated.getStartTime()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time must be after start time.");
-        if (updated.getAttendees() < 1)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attendees must be at least 1.");
-
-        // Conflict check — exclude self so the same booking doesn't block its own edit
-        checkConflict(updated.getLocation().trim(), updated.getDate(),
+        validateFields(updated);
+        checkConflict(updated.getLocation(), updated.getDate(),
                       updated.getStartTime(), updated.getEndTime(), id);
 
-        // Apply updates
         existing.setStudentId(updated.getStudentId().trim().toUpperCase());
         existing.setLocation(updated.getLocation().trim());
         existing.setDate(updated.getDate());
@@ -91,12 +58,9 @@ public class BookingService {
         existing.setEndTime(updated.getEndTime());
         existing.setPurpose(updated.getPurpose());
         existing.setAttendees(updated.getAttendees());
-
-        // Reset to PENDING so admin re-reviews the edited booking
         existing.setStatus("PENDING");
         existing.setRejectionReason(null);
         existing.setUpdatedAt(LocalDateTime.now());
-
         return repository.save(existing);
     }
 
@@ -130,20 +94,32 @@ public class BookingService {
 
     // ── HELPERS ──────────────────────────────────────────────────────
 
-    /**
-     * Conflict check helper.
-     * @param excludeId  The booking ID to exclude from conflict check (for self-edit).
-     *                   Pass null when creating.
-     */
-    private void checkConflict(String location,
-                                java.time.LocalDate date,
-                                java.time.LocalTime start,
-                                java.time.LocalTime end,
+    private void validateFields(Booking b) {
+        if (b.getStudentId() == null || b.getStudentId().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student ID is required.");
+        if (b.getLocation() == null || b.getLocation().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location is required.");
+        if (b.getDate() == null || b.getDate().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required.");
+        if (b.getStartTime() == null || b.getStartTime().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time is required.");
+        if (b.getEndTime() == null || b.getEndTime().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time is required.");
+        // String lexicographic comparison works for "HH:mm" format
+        if (b.getEndTime().compareTo(b.getStartTime()) <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "End time must be after start time.");
+        if (b.getAttendees() < 1)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Attendees must be at least 1.");
+    }
+
+    private void checkConflict(String location, String date,
+                                String start, String end,
                                 String excludeId) {
+        List<Booking> conflicts = repository.findConflictingBookings(
+                location.trim(), date, start, end);
 
-        List<Booking> conflicts = repository.findConflictingBookings(location, date, start, end);
-
-        // Remove self from conflict list when editing
         if (excludeId != null) {
             conflicts = conflicts.stream()
                     .filter(b -> !b.getId().equals(excludeId))
@@ -153,9 +129,8 @@ public class BookingService {
         if (!conflicts.isEmpty()) {
             Booking clash = conflicts.get(0);
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "This location (" + location + ") is already booked on " +
-                    date + " from " + clash.getStartTime() +
-                    " to " + clash.getEndTime() +
+                    "This location (" + location + ") is already booked on " + date +
+                    " from " + clash.getStartTime() + " to " + clash.getEndTime() +
                     ". Please choose a different time slot.");
         }
     }

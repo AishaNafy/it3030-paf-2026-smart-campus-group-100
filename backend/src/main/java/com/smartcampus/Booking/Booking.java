@@ -3,22 +3,28 @@ package com.smartcampus.Booking;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
+/**
+ * date, startTime, endTime are stored as plain Strings (e.g. "2026-04-25", "14:30")
+ * to prevent MongoDB/Spring from applying any timezone conversion.
+ *
+ * Previously using LocalDate / LocalTime caused UTC offset shifts
+ * (Sri Lanka UTC+5:30 → values shifted backwards by 5h30m in MongoDB).
+ */
 @Document(collection = "Booking")
 public class Booking {
 
     @Id
     private String id;
 
-    private String studentId;   // e.g. IT22XXXXXXX
+    private String studentId;
     private String location;
 
-    private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    // Stored as plain strings — no timezone conversion ever applied
+    private String date;       // "YYYY-MM-DD"
+    private String startTime;  // "HH:mm"
+    private String endTime;    // "HH:mm"
 
     private String purpose;
     private int    attendees;
@@ -40,14 +46,14 @@ public class Booking {
     public String getLocation()                        { return location; }
     public void   setLocation(String location)         { this.location = location; }
 
-    public LocalDate getDate()                         { return date; }
-    public void      setDate(LocalDate date)           { this.date = date; }
+    public String getDate()                            { return date; }
+    public void   setDate(String date)                 { this.date = date; }
 
-    public LocalTime getStartTime()                    { return startTime; }
-    public void      setStartTime(LocalTime startTime) { this.startTime = startTime; }
+    public String getStartTime()                       { return startTime; }
+    public void   setStartTime(String startTime)       { this.startTime = startTime; }
 
-    public LocalTime getEndTime()                      { return endTime; }
-    public void      setEndTime(LocalTime endTime)     { this.endTime = endTime; }
+    public String getEndTime()                         { return endTime; }
+    public void   setEndTime(String endTime)           { this.endTime = endTime; }
 
     public String getPurpose()                         { return purpose; }
     public void   setPurpose(String purpose)           { this.purpose = purpose; }
@@ -61,9 +67,9 @@ public class Booking {
     public String getRejectionReason()                       { return rejectionReason; }
     public void   setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 
-    public LocalDateTime getCreatedAt()                      { return createdAt; }
-    public void          setCreatedAt(LocalDateTime v)       { this.createdAt = v; }
+    public LocalDateTime getCreatedAt()                { return createdAt; }
+    public void          setCreatedAt(LocalDateTime v) { this.createdAt = v; }
 
-    public LocalDateTime getUpdatedAt()                      { return updatedAt; }
-    public void          setUpdatedAt(LocalDateTime v)       { this.updatedAt = v; }
+    public LocalDateTime getUpdatedAt()                { return updatedAt; }
+    public void          setUpdatedAt(LocalDateTime v) { this.updatedAt = v; }
 }

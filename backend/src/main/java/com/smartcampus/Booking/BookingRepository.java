@@ -4,8 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -16,18 +14,20 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     List<Booking> findByStatus(String status);
 
     /**
-     * Conflict detection:
-     * Same location + same date + overlapping time range + not already REJECTED or CANCELLED.
+     * Conflict detection using plain String comparison.
+     *
+     * Since times are stored as "HH:mm" strings (ISO-formatted),
+     * lexicographic comparison == chronological comparison.
      *
      * Overlap condition: existingStart < newEnd  AND  existingEnd > newStart
-     * This catches:  exact same time, partial overlap, and one booking inside another.
+     * Same date + same location + PENDING or APPROVED only.
      */
     @Query("{ 'location': ?0, 'date': ?1, " +
            "'status': { $in: ['PENDING', 'APPROVED'] }, " +
            "'startTime': { $lt: ?3 }, " +
            "'endTime':   { $gt: ?2 } }")
     List<Booking> findConflictingBookings(String location,
-                                          LocalDate date,
-                                          LocalTime newStart,
-                                          LocalTime newEnd);
+                                          String date,
+                                          String newStart,
+                                          String newEnd);
 }
