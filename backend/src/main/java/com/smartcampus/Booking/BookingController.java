@@ -22,24 +22,33 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(booking));
     }
 
-    /**
-     * GET /api/bookings — returns ALL bookings.
-     * Optional filter: ?status=PENDING | APPROVED | REJECTED | CANCELLED
-     */
+    /** GET /api/bookings — all bookings, optional ?status= filter */
     @GetMapping
     public ResponseEntity<List<Booking>> getBookings(
             @RequestParam(required = false) String status) {
         return ResponseEntity.ok(bookingService.getBookings(status));
     }
 
-    /** GET /api/bookings/{id} — single booking by ID */
+    /** GET /api/bookings/{id} — single booking */
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable String id) {
         return ResponseEntity.ok(bookingService.getBookingById(id));
     }
 
     /**
-     * PUT /api/bookings/{id}/status — approve, reject, or cancel a booking.
+     * PUT /api/bookings/{id} — edit booking details.
+     * Resets the booking status to PENDING so the admin re-reviews it.
+     * Body: full Booking object with updated fields.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Booking> updateBooking(
+            @PathVariable String id,
+            @RequestBody Booking updated) {
+        return ResponseEntity.ok(bookingService.updateBooking(id, updated));
+    }
+
+    /**
+     * PUT /api/bookings/{id}/status — change workflow status only.
      * Body: { "status": "APPROVED" | "REJECTED" | "CANCELLED", "reason": "..." }
      */
     @PutMapping("/{id}/status")
@@ -50,7 +59,7 @@ public class BookingController {
                 bookingService.updateStatus(id, payload.get("status"), payload.get("reason")));
     }
 
-    /** DELETE /api/bookings/{id} — hard-delete (admin only) */
+    /** DELETE /api/bookings/{id} — hard-delete */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable String id) {
         bookingService.deleteBooking(id);
