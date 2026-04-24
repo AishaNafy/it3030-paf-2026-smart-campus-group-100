@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     @Autowired private BookingRepository        repository;
+    @Autowired private DeletedBookingRepository deletedRepository;
     @Autowired private SequenceGeneratorService sequenceGenerator;
 
     // ── CREATE ──────────────────────────────────────────────────────
@@ -41,6 +42,13 @@ public class BookingService {
         return repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Booking " + id + " not found."));
+    }
+
+    /** Returns all deletion log entries, newest first. */
+    public List<DeletedBooking> getDeletedBookings() {
+        return deletedRepository.findAll().stream()
+                .sorted((a, b) -> b.getDeletedAt().compareTo(a.getDeletedAt()))
+                .collect(Collectors.toList());
     }
 
     // ── EDIT ─────────────────────────────────────────────────────────
@@ -88,8 +96,30 @@ public class BookingService {
 
     // ── DELETE ───────────────────────────────────────────────────────
 
-    public void deleteBooking(String id) {
-        repository.delete(getBookingById(id));
+    /**
+     * Deletes a booking and saves a log entry to DeletedBookings collection.
+     * The original booking ID (e.g. B003) is preserved in the log and never reused.
+     *
+     * @param id     The booking ID to delete
+     * @param reason Why it was deleted (required from frontend)
+     */
+    public void deleteBooking(String id, String reason) {
+        Booking booking = getBookingById(id);
+
+        // Save deletion log before removing
+        DeletedBooking log = new DeletedBooking();
+        log.setBookingId(booking.getId());
+        log.setStudentId(booking.getStudentId());
+        log.setLocation(booking.getLocation());
+        log.setDate(booking.getDate());
+        log.setStartTime(booking.getStartTime());
+        log.setEndTime(booking.getEndTime());
+        log.setPurpose(booking.getPurpose());
+        log.setDeleteReason(reason != null ? reason.trim() : "No reason provided");
+        log.setDeletedAt(LocalDateTime.now());
+        deletedRepository.save(log);
+
+        repository.delete(booking);
     }
 
     // ── HELPERS ──────────────────────────────────────────────────────
@@ -105,7 +135,6 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time is required.");
         if (b.getEndTime() == null || b.getEndTime().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time is required.");
-        // String lexicographic comparison works for "HH:mm" format
         if (b.getEndTime().compareTo(b.getStartTime()) <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "End time must be after start time.");
@@ -115,16 +144,14 @@ public class BookingService {
     }
 
     private void checkConflict(String location, String date,
-                                String start, String end,
-                                String excludeId) {
+                                String start, String end, String excludeId) {
         List<Booking> conflicts = repository.findConflictingBookings(
                 location.trim(), date, start, end);
 
-        if (excludeId != null) {
+        if (excludeId != null)
             conflicts = conflicts.stream()
                     .filter(b -> !b.getId().equals(excludeId))
                     .collect(Collectors.toList());
-        }
 
         if (!conflicts.isEmpty()) {
             Booking clash = conflicts.get(0);

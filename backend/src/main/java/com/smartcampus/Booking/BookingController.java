@@ -35,11 +35,13 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingById(id));
     }
 
-    /**
-     * PUT /api/bookings/{id} — edit booking details.
-     * Resets the booking status to PENDING so the admin re-reviews it.
-     * Body: full Booking object with updated fields.
-     */
+    /** GET /api/bookings/deleted — deletion log (all deleted bookings + reasons) */
+    @GetMapping("/deleted")
+    public ResponseEntity<List<DeletedBooking>> getDeletedBookings() {
+        return ResponseEntity.ok(bookingService.getDeletedBookings());
+    }
+
+    /** PUT /api/bookings/{id} — edit booking details, resets to PENDING */
     @PutMapping("/{id}")
     public ResponseEntity<Booking> updateBooking(
             @PathVariable String id,
@@ -48,7 +50,7 @@ public class BookingController {
     }
 
     /**
-     * PUT /api/bookings/{id}/status — change workflow status only.
+     * PUT /api/bookings/{id}/status — workflow status change only.
      * Body: { "status": "APPROVED" | "REJECTED" | "CANCELLED", "reason": "..." }
      */
     @PutMapping("/{id}/status")
@@ -59,10 +61,16 @@ public class BookingController {
                 bookingService.updateStatus(id, payload.get("status"), payload.get("reason")));
     }
 
-    /** DELETE /api/bookings/{id} — hard-delete */
+    /**
+     * DELETE /api/bookings/{id} — delete with reason.
+     * Body: { "reason": "..." }
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable String id) {
-        bookingService.deleteBooking(id);
+    public ResponseEntity<Void> deleteBooking(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, String> payload) {
+        String reason = payload != null ? payload.get("reason") : null;
+        bookingService.deleteBooking(id, reason);
         return ResponseEntity.noContent().build();
     }
 }

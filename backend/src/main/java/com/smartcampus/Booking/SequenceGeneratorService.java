@@ -4,39 +4,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * Generates sequential booking IDs in the format B001, B002, …
- * Reuses IDs that were freed by deletions.
+ * Generates strictly incrementing booking IDs (B001, B002, …).
+ *
+ * IDs are NEVER reused after deletion — the next ID is always
+ * max(existing active IDs, existing deleted IDs) + 1.
+ * This preserves a clean audit trail.
  */
 @Service
 public class SequenceGeneratorService {
 
-    @Autowired
-    private BookingRepository repository;
+    @Autowired private BookingRepository        bookingRepository;
+    @Autowired private DeletedBookingRepository deletedBookingRepository;
 
     public String generateAvailableId() {
-        List<Booking> allBookings = repository.findAll();
+        int maxActive  = maxFrom(bookingRepository.findAll()
+                .stream().map(Booking::getId).toList());
 
-        // Collect the numeric portion of each existing ID (e.g. "B005" → 5)
-        Set<Integer> usedNumbers = allBookings.stream()
-                .map(b -> {
-                    try {
-                        return Integer.parseInt(b.getId().substring(1));
-                    } catch (Exception e) {
-                        return 0;
-                    }
-                })
-                .collect(Collectors.toSet());
+        int maxDeleted = maxFrom(deletedBookingRepository.findAll()
+                .stream().map(DeletedBooking::getBookingId).toList());
 
-        // Find the first unused positive integer
-        int next = 1;
-        while (usedNumbers.contains(next)) {
-            next++;
-        }
-
+        int next = Math.max(maxActive, maxDeleted) + 1;
         return String.format("B%03d", next);
+    }
+
+    /** Parse the numeric part of IDs like "B005" → 5, return highest found (0 if none). */
+    private int maxFrom(List<String> ids) {
+        return ids.stream()
+                .mapToInt(id -> {
+                    try { return Integer.parseInt(id.substring(1)); }
+                    catch (Exception e) { return 0; }
+                })
+                .max()
+                .orElse(0);
     }
 }
