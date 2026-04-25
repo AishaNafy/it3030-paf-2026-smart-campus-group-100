@@ -10,9 +10,21 @@ import {
   Settings2 
 } from 'lucide-react'; // Booking: Added icons for booking module
 import { LayoutDashboard, TicketPlus, List, User, Building } from 'lucide-react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, TicketPlus, List, User, Building, LogOut, Bell } from 'lucide-react';
+import api from '../api/axiosConfig';
+import NotificationDropdown from './NotificationDropdown';
 
 const Layout = ({ role }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (_) {}
+    navigate('/login');
+  };
 
   const navItems = [
     // Ticketing Part (Unchanged)
@@ -32,6 +44,7 @@ const Layout = ({ role }) => {
     { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['technician'] },
     { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
     { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
+    { path: `/admin/users`, label: 'User Management', icon: <User size={20} />, roles: ['admin'] },
     { path: `/admin/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['admin'] },
   ];
 
@@ -83,11 +96,22 @@ const Layout = ({ role }) => {
             {/* Dynamic Title: Shows 'New Booking' or 'My Bookings' instead of default */}
             {currentNavItem?.label || 'Smart Campus'}
           </h2>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-              {role.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-5">
+            <NotificationDropdown />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                {role.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm font-medium text-gray-600 capitalize">{role}</span>
             </div>
-            <span className="text-sm font-medium text-gray-600 capitalize">{role}</span>
+            <button
+              id="logout-btn"
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
         </header>
         
