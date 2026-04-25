@@ -10,6 +10,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import BookingRequestPage from './pages/Booking/BookingRequestPage'; // Booking
 import MyBookings from './pages/Booking/MyBookings'; // Booking
 import BookingAdminDashboard from './pages/Booking/AdminDashboard'; // Booking (Renamed to avoid conflict)
+import FacilityListPage from './pages/FacilityListPage';
+import FacilityDetailsPage from './pages/FacilityDetailsPage';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path="ticket/:id" element={<TicketDetailsPage />} />
           <Route path="book" element={<BookingRequestPage />} /> {/* Booking */}
           <Route path="my-bookings" element={<MyBookings />} /> {/* Booking */}
+          <Route path="facilities" element={<FacilityListPage />} />
+          <Route path="facilities/:id" element={<FacilityDetailsPage />} />
         </Route>
 
         {/* Technician Routes */}
@@ -39,6 +43,8 @@ function App() {
           <Route path="reports" element={<ReportingDashboard />} />
           <Route path="ticket/:id" element={<TicketDetailsPage />} />
           <Route path="manage-bookings" element={<BookingAdminDashboard />} /> {/* Booking */}
+          <Route path="facilities" element={<FacilityListPage />} />
+          <Route path="facilities/:id" element={<FacilityDetailsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

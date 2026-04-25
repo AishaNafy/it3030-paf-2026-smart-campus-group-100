@@ -9,6 +9,7 @@ import {
   CalendarDays, 
   Settings2 
 } from 'lucide-react'; // Booking: Added icons for booking module
+import { LayoutDashboard, TicketPlus, List, User, Building } from 'lucide-react';
 
 const Layout = ({ role }) => {
   const location = useLocation();
@@ -27,6 +28,11 @@ const Layout = ({ role }) => {
     { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
     { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
     { path: `/admin/manage-bookings`, label: 'Manage Bookings', icon: <Settings2 size={20} />, roles: ['admin'] },
+    { path: `/student/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['student'] },
+    { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['technician'] },
+    { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
+    { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
+    { path: `/admin/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['admin'] },
   ];
 
   // Helper to find the current page label for the header
