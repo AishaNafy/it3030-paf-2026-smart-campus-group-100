@@ -1,0 +1,28 @@
+# Build artifacts
+backend/target/
+frontend/build/
+frontend/node_modules/
+.gradle/
+build/
+bin/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.nb-configuration.xml
+
+# System files
+DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+env.properties

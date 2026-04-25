@@ -2,6 +2,7 @@ package com.smartcampus.auth.service;
 
 import com.smartcampus.auth.model.AppUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -17,11 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final AppUserService appUserService;
     private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+
+    public CustomOAuth2UserService(@Lazy AppUserService appUserService) {
+        this.appUserService = appUserService;
+    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
