@@ -1,9 +1,18 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TicketPlus, List, User, Building } from 'lucide-react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, TicketPlus, List, User, Building, LogOut } from 'lucide-react';
+import api from '../api/axiosConfig';
 
 const Layout = ({ role }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (_) {}
+    navigate('/login');
+  };
 
   const navItems = [
     { path: `/student`, label: 'My Tickets', icon: <List size={20} />, roles: ['student'] },
@@ -12,6 +21,7 @@ const Layout = ({ role }) => {
     { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['technician'] },
     { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
     { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
+    { path: `/admin/users`, label: 'User Management', icon: <User size={20} />, roles: ['admin'] },
     { path: `/admin/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['admin'] },
   ];
 
@@ -58,6 +68,14 @@ const Layout = ({ role }) => {
               {role.charAt(0).toUpperCase()}
             </div>
             <span className="text-sm font-medium text-gray-600 capitalize">{role}</span>
+            <button
+              id="logout-btn"
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
         </header>
         

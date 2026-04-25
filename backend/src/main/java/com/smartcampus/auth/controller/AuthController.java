@@ -1,10 +1,13 @@
 package com.smartcampus.auth.controller;
 
 import com.smartcampus.auth.dto.AuthUserResponse;
+import com.smartcampus.auth.dto.CreateStudentAccountRequest;
 import com.smartcampus.auth.dto.LoginRequest;
 import com.smartcampus.auth.model.AppUser;
+import com.smartcampus.auth.model.Role;
 import com.smartcampus.auth.service.AppUserService;
 import com.smartcampus.auth.util.SecurityUtils;
+import com.smartcampus.common.exception.BadRequestException;
 import com.smartcampus.common.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +52,17 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody CreateStudentAccountRequest request) {
+        try {
+            request.setRole(Role.STUDENT); // Always register as STUDENT
+            AppUser user = appUserService.createUserAccount(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(appUserService.toAuthUserResponse(user));
+        } catch (BadRequestException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
         }
     }
 

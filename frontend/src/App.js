@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import TicketCreationPage from './pages/TicketCreationPage';
 import TicketListPage from './pages/TicketListPage';
 import TechnicianDashboard from './pages/TechnicianDashboard';
@@ -9,13 +11,15 @@ import TicketDetailsPage from './pages/TicketDetailsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import FacilityListPage from './pages/FacilityListPage';
 import FacilityDetailsPage from './pages/FacilityDetailsPage';
+import UserManagementPage from './pages/UserManagementPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect root to student by default, or just leave it empty if user prefers */}
-        <Route path="/" element={<Navigate to="/student" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Student Routes */}
         <Route path="/student" element={<Layout role="student" />}>
@@ -26,16 +30,15 @@ function App() {
           <Route path="facilities/:id" element={<FacilityDetailsPage />} />
         </Route>
 
-        {/* Technician Routes */}
-        <Route path="/technician" element={<Layout role="technician" />}>
-          <Route index element={<TechnicianDashboard />} />
-          <Route path="ticket/:id" element={<TicketDetailsPage />} />
-        </Route>
+        {/* Technician Routes - dashboard handles its own auth & layout */}
+        <Route path="/technician" element={<TechnicianDashboard />} />
+        <Route path="/technician/ticket/:id" element={<Layout role="technician"><TicketDetailsPage /></Layout>} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<Layout role="admin" />}>
           <Route index element={<AdminDashboard />} />
           <Route path="reports" element={<ReportingDashboard />} />
+          <Route path="users" element={<UserManagementPage />} />
           <Route path="ticket/:id" element={<TicketDetailsPage />} />
           <Route path="facilities" element={<FacilityListPage />} />
           <Route path="facilities/:id" element={<FacilityDetailsPage />} />

@@ -73,6 +73,13 @@ public class AppUserService {
         appUserRepository.deleteById(id);
     }
 
+    public AppUser updateUserRole(String id, Role newRole) {
+        AppUser user = appUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setRole(newRole);
+        return appUserRepository.save(user);
+    }
+
     public AppUser getByEmail(String email) {
         return appUserRepository.findByEmail(normalizeEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user record not found"));
