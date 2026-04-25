@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   TicketPlus, 
@@ -7,11 +7,11 @@ import {
   User, 
   CalendarPlus, 
   CalendarDays, 
-  Settings2 
-} from 'lucide-react'; // Booking: Added icons for booking module
-import { LayoutDashboard, TicketPlus, List, User, Building } from 'lucide-react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, TicketPlus, List, User, Building, LogOut, Bell } from 'lucide-react';
+  Settings2, 
+  Building, 
+  LogOut, 
+  Bell 
+} from 'lucide-react';
 import api from '../api/axiosConfig';
 import NotificationDropdown from './NotificationDropdown';
 
