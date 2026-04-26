@@ -112,21 +112,33 @@ const BookingRequestPage = () => {
       const res  = await fetch(API, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body:    JSON.stringify(payload),
       });
-      const data = await res.json();
+      if (res.status === 401 || res.status === 403) {
+        setError('Authentication required. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      let data = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      }
 
       if (res.ok) {
-        setSuccess(`Booking ${data.id} submitted successfully! Status: PENDING review.`);
+        setSuccess(`Booking ${data.id || ''} submitted successfully! Status: PENDING review.`);
         setForm(EMPTY_FORM);
       } else if (res.status === 409) {
         // Conflict — show the popup modal with the server's message
         setConflictMsg(data.error || 'This location is already booked at the selected time.');
       } else {
-        setError(data.error || data.message || 'Submission failed. Please try again.');
+        setError(data.error || data.message || `Submission failed with status ${res.status}.`);
       }
-    } catch {
-      setError('Cannot reach the server. Ensure Spring Boot is running on port 8080.');
+    } catch (err) {
+      console.error(err);
+      setError('Cannot reach the server or CORS error. Ensure Spring Boot is running on port 8080.');
     } finally {
       setLoading(false);
     }

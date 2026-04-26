@@ -127,7 +127,7 @@ const AdminDashboard = () => {
     try {
       const params = new URLSearchParams();
       if (filterStatus) params.append('status', filterStatus);
-      const res  = await fetch(`${API}?${params}`);
+      const res  = await fetch(`${API}?${params}`, { credentials: 'include' });
       const data = await res.json();
       setBookings(Array.isArray(data) ? data : []);
     } catch {
@@ -142,6 +142,7 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(`${API}/${id}/status`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status, reason: reason || '' }),
       });
       if (!res.ok) { const d = await res.json(); alert(d.error || 'Action failed.'); }
@@ -162,7 +163,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(`Permanently delete booking ${id}?`)) return;
     setActionLoading(id);
-    try { await fetch(`${API}/${id}`, { method: 'DELETE' }); fetchBookings(); }
+    try { await fetch(`${API}/${id}`, { method: 'DELETE', credentials: 'include' }); fetchBookings(); }
     catch { alert('Delete failed.'); }
     finally { setActionLoading(null); }
   };

@@ -223,6 +223,7 @@ const EditModal = ({ booking, onSave, onCancel }) => {
       };
       const res  = await fetch(`${API}/${booking.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -434,7 +435,7 @@ const DeletedLog = () => {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    fetch(`${API}/deleted`)
+    fetch(`${API}/deleted`, { credentials: 'include' })
       .then(r => r.json())
       .then(d => setDeleted(Array.isArray(d) ? d.map(normalizeDeleted) : []))
       .catch(() => {})
@@ -511,7 +512,7 @@ const MyBookings = () => {
     try {
       const params = new URLSearchParams();
       if (filterStatus) params.append('status', filterStatus);
-      const res  = await fetch(`${API}?${params}`);
+      const res  = await fetch(`${API}?${params}`, { credentials: 'include' });
       const data = await res.json();
       // Normalise every booking so date/time are always plain strings
       setBookings(Array.isArray(data) ? data.map(normalizeBooking) : []);
@@ -530,6 +531,7 @@ const MyBookings = () => {
     try {
       const res = await fetch(`${API}/${id}/status`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status, reason }),
       });
       if (!res.ok) { const d = await res.json(); alert(d.error || 'Action failed.'); }
@@ -551,6 +553,7 @@ const MyBookings = () => {
     try {
       await fetch(`${API}/${id}`, {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ reason }),
       });
       fetchBookings();
