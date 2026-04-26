@@ -9,8 +9,7 @@ import {
   CalendarDays, 
   Settings2, 
   Building, 
-  LogOut, 
-  Bell 
+  LogOut 
 } from 'lucide-react';
 import api from '../api/axiosConfig';
 import NotificationDropdown from './NotificationDropdown';
@@ -28,31 +27,31 @@ const Layout = ({ role }) => {
 
   const navItems = [
     // Ticketing Part (Unchanged)
-    { path: `/student`, label: 'My Tickets', icon: <List size={20} />, roles: ['student'] },
-    { path: `/student/create`, label: 'New Ticket', icon: <TicketPlus size={20} />, roles: ['student'] },
+    { path: `/student`, label: 'My Tickets', icon: <List size={20} />, roles: ['STUDENT'] },
+    { path: `/student/create`, label: 'New Ticket', icon: <TicketPlus size={20} />, roles: ['STUDENT'] },
     
     // Booking Module (Corrected Paths)
-    { path: `/student/book`, label: 'New Booking', icon: <CalendarPlus size={20} />, roles: ['student'] },
-    { path: `/student/my-bookings`, label: 'My Bookings', icon: <CalendarDays size={20} />, roles: ['student'] },
+    { path: `/student/book`, label: 'New Booking', icon: <CalendarPlus size={20} />, roles: ['STUDENT'] },
+    { path: `/student/my-bookings`, label: 'My Bookings', icon: <CalendarDays size={20} />, roles: ['STUDENT'] },
     
     // Technician & Admin (Unchanged)
-    { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['technician'] },
-    { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
-    { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
-    { path: `/admin/manage-bookings`, label: 'Manage Bookings', icon: <Settings2 size={20} />, roles: ['admin'] },
-    { path: `/student/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['student'] },
-    { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['technician'] },
-    { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['admin'] },
-    { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['admin'] },
-    { path: `/admin/users`, label: 'User Management', icon: <User size={20} />, roles: ['admin'] },
-    { path: `/admin/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['admin'] },
+    { path: `/technician`, label: 'Tech Dashboard', icon: <User size={20} />, roles: ['TECHNICIAN'] },
+    { path: `/admin`, label: 'Admin Dashboard', icon: <List size={20} />, roles: ['ADMIN'] },
+    { path: `/admin/reports`, label: 'Reports', icon: <LayoutDashboard size={20} />, roles: ['ADMIN'] },
+    { path: `/admin/manage-bookings`, label: 'Manage Bookings', icon: <Settings2 size={20} />, roles: ['ADMIN'] },
+    { path: `/admin/users`, label: 'User Management', icon: <User size={20} />, roles: ['ADMIN'] },
+    { path: `/admin/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['ADMIN'] },
+    { path: `/student/facilities`, label: 'Facilities', icon: <Building size={20} />, roles: ['STUDENT'] },
   ];
 
   // Helper to find the current page label for the header
-  const currentNavItem = navItems.find(item => 
-    location.pathname === item.path || 
-    (item.path !== `/${role}` && location.pathname.startsWith(item.path))
-  );
+  // Sort by path length descending so specific sub-routes (/admin/users) match before generic ones (/admin)
+  const currentNavItem = [...navItems]
+    .sort((a, b) => b.path.length - a.path.length)
+    .find(item => 
+      location.pathname === item.path || 
+      (item.path !== `/${role?.toLowerCase()}` && location.pathname.startsWith(item.path))
+    );
 
   return (
     <div className="flex h-screen bg-background">

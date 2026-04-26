@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ClipboardList, CheckCircle2, Clock, AlertTriangle, 
-  ChevronRight, X, Save, RefreshCw, User, LogOut, Bell
+  ClipboardList, CheckCircle2, Clock, 
+  X, Save, RefreshCw, User, LogOut
 } from 'lucide-react';
 import api from '../api/axiosConfig';
 import NotificationDropdown from '../components/NotificationDropdown';
@@ -34,20 +34,25 @@ const TechnicianDashboard = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // ── Auth Check ─────────────────────────────────────────────────────────────
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
+      console.log('Checking technician auth...');
       const res = await api.get('/auth/me');
-      if (res.data.role !== 'technician' && res.data.role !== 'admin') {
+      console.log('Auth response:', res.data);
+      const role = res.data.role.toUpperCase();
+      if (role !== 'TECHNICIAN' && role !== 'ADMIN') {
+        console.warn('Access denied: Role is', role);
         navigate('/login');
       } else {
         setUser(res.data);
       }
     } catch (err) {
+      console.error('Auth check failed:', err.response?.status);
       navigate('/login');
     }
-  };
+  }, [navigate]);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -59,10 +64,10 @@ const TechnicianDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  useEffect(() => { checkAuth(); }, []);
-  useEffect(() => { if (user) fetchTickets(); }, [user]);
+  useEffect(() => { checkAuth(); }, [checkAuth]);
+  useEffect(() => { if (user) fetchTickets(); }, [user, fetchTickets]);
 
   const handleLogout = async () => {
     try { await api.post('/auth/logout'); } catch (_) {}

@@ -26,7 +26,7 @@ const ReportingDashboard = () => {
     fetchStats();
   }, []);
 
-  if (role !== 'admin') {
+  if (role?.toUpperCase() !== 'ADMIN') {
     return <div className="p-8 text-center text-red-500">Access Denied. Admin Role Required.</div>;
   }
 

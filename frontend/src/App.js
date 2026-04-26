@@ -25,7 +25,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Student Routes */}
-        <Route path="/student" element={<Layout role="student" />}>
+        <Route path="/student" element={<Layout role="STUDENT" />}>
           <Route index element={<TicketListPage />} />
           <Route path="create" element={<TicketCreationPage />} />
           <Route path="ticket/:id" element={<TicketDetailsPage />} />
@@ -37,10 +37,10 @@ function App() {
 
         {/* Technician Routes - dashboard handles its own auth & layout */}
         <Route path="/technician" element={<TechnicianDashboard />} />
-        <Route path="/technician/ticket/:id" element={<Layout role="technician"><TicketDetailsPage /></Layout>} />
+        <Route path="/technician/ticket/:id" element={<Layout role="TECHNICIAN"><TicketDetailsPage /></Layout>} />
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<Layout role="admin" />}>
+        <Route path="/admin" element={<Layout role="ADMIN" />}>
           <Route index element={<AdminDashboard />} />
           <Route path="reports" element={<ReportingDashboard />} />
           <Route path="users" element={<UserManagementPage />} />
