@@ -28,9 +28,11 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file) {
+    public String storeFile(@org.springframework.lang.NonNull MultipartFile file) {
         // Normalize file name
-        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String rawName = file.getOriginalFilename();
+        if (rawName == null) rawName = "unnamed_file";
+        String originalFileName = StringUtils.cleanPath(rawName);
         String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
 
         try {

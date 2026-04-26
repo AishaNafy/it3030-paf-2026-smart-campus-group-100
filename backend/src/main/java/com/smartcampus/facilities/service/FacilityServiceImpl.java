@@ -20,18 +20,20 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public Facility getFacilityById(String id) {
+    public Facility getFacilityById(@org.springframework.lang.NonNull String id) {
+        if (id.isBlank()) return null;
         Optional<Facility> optionalFacility = facilityRepository.findById(id);
         return optionalFacility.orElse(null);
     }
 
     @Override
-    public Facility createFacility(Facility facility) {
+    public Facility createFacility(@org.springframework.lang.NonNull Facility facility) {
         return facilityRepository.save(facility);
     }
 
     @Override
-    public Facility updateFacility(String id, Facility facilityDetails) {
+    public Facility updateFacility(@org.springframework.lang.NonNull String id, @org.springframework.lang.NonNull Facility facilityDetails) {
+        if (id.isBlank()) return null;
         Optional<Facility> optionalFacility = facilityRepository.findById(id);
         if (optionalFacility.isPresent()) {
             Facility facility = optionalFacility.get();
@@ -48,7 +50,9 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public void deleteFacility(String id) {
-        facilityRepository.deleteById(id);
+    public void deleteFacility(@org.springframework.lang.NonNull String id) {
+        if (!id.isBlank()) {
+            facilityRepository.deleteById(id);
+        }
     }
 }

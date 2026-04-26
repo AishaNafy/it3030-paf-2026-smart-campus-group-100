@@ -18,14 +18,14 @@ public class SmartCampusApplication {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@org.springframework.lang.NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
             }
             
             @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            public void addResourceHandlers(@org.springframework.lang.NonNull ResourceHandlerRegistry registry) {
                 // Map /uploads/** to the uploads directory in the root
                 registry.addResourceHandler("/uploads/**")
                         .addResourceLocations("file:uploads/");

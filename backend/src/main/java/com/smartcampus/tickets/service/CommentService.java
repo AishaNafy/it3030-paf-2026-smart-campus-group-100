@@ -14,7 +14,7 @@ public class CommentService {
     
     private final CommentRepository commentRepository;
     
-    public List<Comment> getCommentsByTicketId(String ticketId) {
+    public List<Comment> getCommentsByTicketId(@org.springframework.lang.NonNull String ticketId) {
         return commentRepository.findByTicketIdOrderByCreatedAtDesc(ticketId);
     }
 
@@ -23,7 +23,7 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(String id) {
+    public void deleteComment(@org.springframework.lang.NonNull String id) {
         commentRepository.deleteById(id);
     }
 }

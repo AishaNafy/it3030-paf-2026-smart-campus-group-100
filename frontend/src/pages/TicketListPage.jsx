@@ -23,7 +23,6 @@ const TicketListPage = () => {
       if(statusFilter) params.append('status', statusFilter);
       if(priorityFilter) params.append('priority', priorityFilter);
       if(categoryFilter) params.append('category', categoryFilter);
-      if(role === 'student') params.append('createdBy', 'StudentUser');
       params.append('page', page);
       params.append('size', 10);
       

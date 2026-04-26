@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.smartcampus.notifications.model.NotificationType;
+import com.smartcampus.notifications.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +17,7 @@ public class BookingService {
     @Autowired private BookingRepository        repository;
     @Autowired private DeletedBookingRepository deletedRepository;
     @Autowired private SequenceGeneratorService sequenceGenerator;
+    @Autowired private NotificationService     notificationService;
 
     // ── CREATE ──────────────────────────────────────────────────────
 
@@ -23,22 +26,42 @@ public class BookingService {
         checkConflict(booking.getLocation(), booking.getDate(),
                       booking.getStartTime(), booking.getEndTime(), null);
 
-        booking.setStudentId(booking.getStudentId().trim().toUpperCase());
+        booking.setStudentId(booking.getStudentId().trim());
         booking.setId(sequenceGenerator.generateAvailableId());
         booking.setStatus("PENDING");
         booking.setCreatedAt(LocalDateTime.now());
         booking.setUpdatedAt(LocalDateTime.now());
-        return repository.save(booking);
+        Booking saved = repository.save(booking);
+
+        // Notify Student
+        notificationService.createNotification(
+            saved.getStudentId(),
+            "Booking Request Submitted",
+            "Your booking request for " + saved.getLocation() + " is pending review.",
+            NotificationType.BOOKING_DECISION,
+            "BOOKING",
+            saved.getId()
+        );
+
+        return saved;
     }
 
     // ── READ ─────────────────────────────────────────────────────────
 
-    public List<Booking> getBookings(String status) {
+    public List<Booking> getBookings(String status, String studentId) {
+        if (studentId != null && !studentId.isBlank()) {
+            if (status != null && !status.isBlank()) {
+                return repository.findByStudentId(studentId).stream()
+                        .filter(b -> b.getStatus().equals(status))
+                        .collect(Collectors.toList());
+            }
+            return repository.findByStudentId(studentId);
+        }
         if (status != null && !status.isBlank()) return repository.findByStatus(status);
         return repository.findAll();
     }
 
-    public Booking getBookingById(String id) {
+    public Booking getBookingById(@org.springframework.lang.NonNull String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Booking " + id + " not found."));
@@ -53,13 +76,23 @@ public class BookingService {
 
     // ── EDIT ─────────────────────────────────────────────────────────
 
-    public Booking updateBooking(String id, Booking updated) {
+    public Booking updateBooking(@org.springframework.lang.NonNull String id, Booking updated) {
         Booking existing = getBookingById(id);
+        
+        // Security check: Student can only update their own booking
+        if (com.smartcampus.auth.util.SecurityUtils.hasRole("STUDENT")) {
+            String currentEmail = com.smartcampus.auth.util.SecurityUtils.currentUserEmail();
+            if (!existing.getStudentId().equalsIgnoreCase(currentEmail)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own bookings.");
+            }
+            updated.setStudentId(currentEmail);
+        }
+        
         validateFields(updated);
         checkConflict(updated.getLocation(), updated.getDate(),
                       updated.getStartTime(), updated.getEndTime(), id);
 
-        existing.setStudentId(updated.getStudentId().trim().toUpperCase());
+        existing.setStudentId(updated.getStudentId().trim());
         existing.setLocation(updated.getLocation().trim());
         existing.setDate(updated.getDate());
         existing.setStartTime(updated.getStartTime());
@@ -69,12 +102,24 @@ public class BookingService {
         existing.setStatus("PENDING");
         existing.setRejectionReason(null);
         existing.setUpdatedAt(LocalDateTime.now());
-        return repository.save(existing);
+        Booking saved = repository.save(existing);
+
+        // Notify Student
+        notificationService.createNotification(
+            saved.getStudentId(),
+            "Booking Updated",
+            "Your booking request for " + saved.getLocation() + " has been updated and is pending review.",
+            NotificationType.BOOKING_DECISION,
+            "BOOKING",
+            saved.getId()
+        );
+
+        return saved;
     }
 
     // ── STATUS UPDATE ─────────────────────────────────────────────────
 
-    public Booking updateStatus(String id, String newStatus, String reason) {
+    public Booking updateStatus(@org.springframework.lang.NonNull String id, String newStatus, String reason) {
         Booking booking = getBookingById(id);
         String current  = booking.getStatus();
 
@@ -91,7 +136,19 @@ public class BookingService {
         if ("REJECTED".equals(newStatus) && reason != null && !reason.isBlank())
             booking.setRejectionReason(reason);
         booking.setUpdatedAt(LocalDateTime.now());
-        return repository.save(booking);
+        Booking saved = repository.save(booking);
+
+        // Notify Student
+        notificationService.createNotification(
+            saved.getStudentId(),
+            "Booking Status: " + newStatus,
+            "Your booking for " + saved.getLocation() + " is now " + newStatus + ".",
+            NotificationType.BOOKING_DECISION,
+            "BOOKING",
+            saved.getId()
+        );
+
+        return saved;
     }
 
     // ── DELETE ───────────────────────────────────────────────────────
@@ -103,8 +160,16 @@ public class BookingService {
      * @param id     The booking ID to delete
      * @param reason Why it was deleted (required from frontend)
      */
-    public void deleteBooking(String id, String reason) {
+    public void deleteBooking(@org.springframework.lang.NonNull String id, String reason) {
         Booking booking = getBookingById(id);
+
+        // Security check: Student can only delete their own booking
+        if (com.smartcampus.auth.util.SecurityUtils.hasRole("STUDENT")) {
+            String currentEmail = com.smartcampus.auth.util.SecurityUtils.currentUserEmail();
+            if (!booking.getStudentId().equalsIgnoreCase(currentEmail)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own bookings.");
+            }
+        }
 
         // Save deletion log before removing
         DeletedBooking log = new DeletedBooking();

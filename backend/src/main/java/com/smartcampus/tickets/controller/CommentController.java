@@ -17,7 +17,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/ticket/{ticketId}")
-    public ResponseEntity<List<Comment>> getComments(@PathVariable String ticketId) {
+    public ResponseEntity<List<Comment>> getComments(@PathVariable @org.springframework.lang.NonNull String ticketId) {
         return ResponseEntity.ok(commentService.getCommentsByTicketId(ticketId));
     }
 
@@ -27,7 +27,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable String id) {
+    public ResponseEntity<Void> deleteComment(@PathVariable @org.springframework.lang.NonNull String id) {
         commentService.deleteComment(id);
         return ResponseEntity.noContent().build();
     }

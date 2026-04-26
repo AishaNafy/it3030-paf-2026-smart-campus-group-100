@@ -90,7 +90,7 @@ const Layout = ({ role }) => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white/80 backdrop-blur-md shadow-sm flex items-center justify-between px-8 z-10 border-b border-slate-100">
+        <header className="h-16 bg-white/80 backdrop-blur-md shadow-sm flex items-center justify-between px-8 z-50 border-b border-slate-100">
           <h2 className="text-xl font-semibold text-gray-800">
             {/* Dynamic Title: Shows 'New Booking' or 'My Bookings' instead of default */}
             {currentNavItem?.label || 'Smart Campus'}

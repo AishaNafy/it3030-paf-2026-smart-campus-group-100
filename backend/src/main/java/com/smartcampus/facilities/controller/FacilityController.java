@@ -20,22 +20,22 @@ public class FacilityController {
     }
 
     @GetMapping("/{id}")
-    public Facility getFacilityById(@PathVariable String id) {
+    public Facility getFacilityById(@PathVariable @org.springframework.lang.NonNull String id) {
         return facilityService.getFacilityById(id);
     }
 
     @PostMapping
-    public Facility createFacility(@RequestBody Facility facility) {
+    public Facility createFacility(@RequestBody @org.springframework.lang.NonNull Facility facility) {
         return facilityService.createFacility(facility);
     }
 
     @PutMapping("/{id}")
-    public Facility updateFacility(@PathVariable String id, @RequestBody Facility facility) {
+    public Facility updateFacility(@PathVariable @org.springframework.lang.NonNull String id, @RequestBody @org.springframework.lang.NonNull Facility facility) {
         return facilityService.updateFacility(id, facility);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteFacility(@PathVariable String id) {
+    public void deleteFacility(@PathVariable @org.springframework.lang.NonNull String id) {
         facilityService.deleteFacility(id);
     }
 }

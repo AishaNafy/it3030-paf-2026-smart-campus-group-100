@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Clock, Inbox, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const NotificationDropdown = () => {
@@ -9,14 +10,18 @@ const NotificationDropdown = () => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
+  const navigate = useNavigate();
+
   const fetchNotifications = async () => {
     try {
       setLoading(true);
       const res = await api.get('/notifications?size=5');
-      setNotifications(res.data.content || []);
+      const data = res.data.content || [];
+      console.log('Fetched notifications:', data); // Debug log
+      setNotifications(data);
       
       const countRes = await api.get('/notifications/unread-count');
-      setUnreadCount(countRes.data);
+      setUnreadCount(countRes.data.count);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     } finally {
@@ -53,7 +58,7 @@ const NotificationDropdown = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await api.post('/notifications/read-all');
+      await api.patch('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (err) {
@@ -62,6 +67,7 @@ const NotificationDropdown = () => {
   };
 
   const getTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     const now = new Date();
     const diffInSec = Math.floor((now - date) / 1000);
@@ -76,12 +82,13 @@ const NotificationDropdown = () => {
     <div className="relative" ref={dropdownRef}>
       {/* Bell Icon */}
       <button
+        id="notification-bell"
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-slate-100 transition-colors relative"
+        className="p-2 rounded-full hover:bg-slate-100 transition-colors relative group"
       >
-        <Bell size={20} className="text-gray-600" />
+        <Bell size={20} className={`transition-colors ${unreadCount > 0 ? 'text-teal-600' : 'text-gray-500'}`} />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -89,12 +96,12 @@ const NotificationDropdown = () => {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
-          <div className="p-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-            <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+        <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 z-[100] overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+            <h3 className="font-bold text-gray-800 text-sm">
               Notifications
               {unreadCount > 0 && (
-                <span className="bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded text-[10px]">
+                <span className="ml-2 bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded text-[10px]">
                   {unreadCount} New
                 </span>
               )}
@@ -109,9 +116,9 @@ const NotificationDropdown = () => {
             )}
           </div>
 
-          <div className="max-h-[350px] overflow-auto">
+          <div className="max-h-[400px] overflow-auto">
             {loading && notifications.length === 0 ? (
-              <div className="p-10 text-center text-gray-400 text-xs animate-pulse">
+              <div className="p-10 text-center text-gray-400 text-xs">
                 Loading...
               </div>
             ) : notifications.length === 0 ? (
@@ -124,23 +131,22 @@ const NotificationDropdown = () => {
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer relative group ${!n.read ? 'bg-teal-50/30' : ''}`}
+                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer relative ${!n.read ? 'bg-teal-50/30' : ''}`}
                     onClick={() => !n.read && handleMarkAsRead(n.id)}
                   >
-                    {!n.read && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-teal-500"></div>
-                    )}
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-gray-800 text-[13px]">{n.title}</span>
-                      <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                    <div className="flex justify-between items-start gap-2 mb-1">
+                      <span className={`font-bold text-[13px] ${!n.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                        {n.title || 'Notification'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 whitespace-nowrap flex items-center gap-1 shrink-0">
                         <Clock size={10} /> {getTimeAgo(n.createdAt)}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-xs line-clamp-2 leading-relaxed">
+                    <p className={`text-xs leading-relaxed mb-2 ${!n.read ? 'text-gray-700' : 'text-gray-500'}`}>
                       {n.message}
                     </p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-[10px] font-semibold text-teal-600 uppercase tracking-wider">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wider">
                         {n.referenceType}
                       </span>
                       {!n.read && (
@@ -156,7 +162,13 @@ const NotificationDropdown = () => {
           </div>
 
           <div className="p-3 bg-slate-50/50 border-t border-slate-50 text-center">
-            <button className="text-xs text-gray-500 font-medium hover:text-teal-600">
+            <button 
+              onClick={() => {
+                setIsOpen(false);
+                navigate(window.location.pathname.startsWith('/admin') ? '/admin/notifications' : '/student/notifications');
+              }}
+              className="text-xs text-teal-600 font-semibold hover:text-teal-800"
+            >
               View all notifications
             </button>
           </div>
