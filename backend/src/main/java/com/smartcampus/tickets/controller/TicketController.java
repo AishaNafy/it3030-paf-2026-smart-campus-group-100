@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.smartcampus.auth.util.SecurityUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,15 @@ public class TicketController {
         List<String> fileUrls = new ArrayList<>();
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
-                fileUrls.add(fileStorageService.storeFile(file));
+                if (file != null) {
+                    fileUrls.add(fileStorageService.storeFile(file));
+                }
             }
         }
         ticket.setAttachments(fileUrls);
+        
+        // Security: Set createdBy to the currently authenticated user's email
+        ticket.setCreatedBy(SecurityUtils.currentUserEmail());
         
         Ticket createdTicket = ticketService.createTicket(ticket);
         return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
@@ -56,22 +62,28 @@ public class TicketController {
         Sort.Direction direction = sortParams[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         
-        Page<Ticket> tickets = ticketService.getTickets(status, priority, category, createdBy, assignedTo, pageable);
+        // Security logic: If student, they only see THEIR tickets
+        String filterCreatedBy = createdBy;
+        if (SecurityUtils.hasRole("STUDENT")) {
+            filterCreatedBy = SecurityUtils.currentUserEmail();
+        }
+        
+        Page<Ticket> tickets = ticketService.getTickets(status, priority, category, filterCreatedBy, assignedTo, pageable);
         return ResponseEntity.ok(tickets);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable String id) {
+    public ResponseEntity<Ticket> getTicketById(@PathVariable @org.springframework.lang.NonNull String id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Ticket> updateTicket(@PathVariable String id, @RequestBody Ticket ticketDetails) {
+    public ResponseEntity<Ticket> updateTicket(@PathVariable @org.springframework.lang.NonNull String id, @RequestBody Ticket ticketDetails) {
         return ResponseEntity.ok(ticketService.updateTicket(id, ticketDetails));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTicket(@PathVariable String id) {
+    public ResponseEntity<Void> deleteTicket(@PathVariable @org.springframework.lang.NonNull String id) {
         ticketService.deleteTicket(id);
         return ResponseEntity.noContent().build();
     }

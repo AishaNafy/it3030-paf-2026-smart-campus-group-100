@@ -129,8 +129,7 @@ const TicketCreationPage = () => {
     // Spring Boot expects ticket as application/json in a multipart request if we use @RequestPart
     // Alternatively we can stringify and append.
     payload.append('ticket', new Blob([JSON.stringify({
-      ...formData,
-      createdBy: 'StudentUser' // Simulating current user ID
+      ...formData
     })], { type: "application/json" }));
 
     files.forEach(file => {
@@ -141,7 +140,7 @@ const TicketCreationPage = () => {
       await api.post('/tickets', payload, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      navigate('/');
+      navigate('/student');
     } catch (err) {
       console.error(err);
       setError("Failed to create ticket. Please verify backend is running.");
@@ -310,7 +309,7 @@ const TicketCreationPage = () => {
         </div>
 
         <div className="pt-4 border-t flex justify-end gap-3">
-          <button type="button" onClick={() => navigate('/')} className="btn-secondary">
+          <button type="button" onClick={() => navigate('/student')} className="btn-secondary">
             Cancel
           </button>
           <button type="submit" disabled={loading} className="btn-primary min-w-[120px]">

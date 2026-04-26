@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.smartcampus.auth.util.SecurityUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -19,19 +20,30 @@ public class BookingController {
     /** POST /api/bookings — create a new PENDING booking */
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
+        // Security: For students, force the studentId to be their email
+        if (SecurityUtils.hasRole("STUDENT")) {
+            booking.setStudentId(SecurityUtils.currentUserEmail());
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(booking));
     }
 
     /** GET /api/bookings — all bookings, optional ?status= filter */
     @GetMapping
     public ResponseEntity<List<Booking>> getBookings(
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(bookingService.getBookings(status));
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String studentId) {
+        
+        String filterStudentId = studentId;
+        if (SecurityUtils.hasRole("STUDENT")) {
+            filterStudentId = SecurityUtils.currentUserEmail();
+        }
+        
+        return ResponseEntity.ok(bookingService.getBookings(status, filterStudentId));
     }
 
     /** GET /api/bookings/{id} — single booking */
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable String id) {
+    public ResponseEntity<Booking> getBookingById(@PathVariable @org.springframework.lang.NonNull String id) {
         return ResponseEntity.ok(bookingService.getBookingById(id));
     }
 
@@ -44,7 +56,7 @@ public class BookingController {
     /** PUT /api/bookings/{id} — edit booking details, resets to PENDING */
     @PutMapping("/{id}")
     public ResponseEntity<Booking> updateBooking(
-            @PathVariable String id,
+            @PathVariable @org.springframework.lang.NonNull String id,
             @RequestBody Booking updated) {
         return ResponseEntity.ok(bookingService.updateBooking(id, updated));
     }
@@ -55,7 +67,7 @@ public class BookingController {
      */
     @PutMapping("/{id}/status")
     public ResponseEntity<Booking> updateStatus(
-            @PathVariable String id,
+            @PathVariable @org.springframework.lang.NonNull String id,
             @RequestBody Map<String, String> payload) {
         return ResponseEntity.ok(
                 bookingService.updateStatus(id, payload.get("status"), payload.get("reason")));
@@ -67,7 +79,7 @@ public class BookingController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(
-            @PathVariable String id,
+            @PathVariable @org.springframework.lang.NonNull String id,
             @RequestBody(required = false) Map<String, String> payload) {
         String reason = payload != null ? payload.get("reason") : null;
         bookingService.deleteBooking(id, reason);
