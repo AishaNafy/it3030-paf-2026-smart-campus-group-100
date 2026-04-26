@@ -4,7 +4,9 @@ import {
   CalendarDays, Clock, MapPin, Users, ChevronDown, ChevronUp, BadgeInfo
 } from 'lucide-react';
 
-const API = 'http://localhost:8080/api/bookings';
+import api from '../../api/axiosConfig';
+
+const API = '/bookings';
 
 const statusStyle = {
   PENDING:   { bg: '#FFF8E1', text: '#B45309' },
@@ -125,11 +127,10 @@ const AdminDashboard = () => {
   const fetchBookings = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const params = new URLSearchParams();
-      if (filterStatus) params.append('status', filterStatus);
-      const res  = await fetch(`${API}?${params}`);
-      const data = await res.json();
-      setBookings(Array.isArray(data) ? data : []);
+      const res = await api.get(API, {
+        params: { status: filterStatus }
+      });
+      setBookings(Array.isArray(res.data) ? res.data : []);
     } catch {
       setError('Failed to load bookings. Ensure the server is running on port 8080.');
     } finally { setLoading(false); }
@@ -140,11 +141,7 @@ const AdminDashboard = () => {
   const performUpdate = async (id, status, reason) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`${API}/${id}/status`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, reason: reason || '' }),
-      });
-      if (!res.ok) { const d = await res.json(); alert(d.error || 'Action failed.'); }
+      await api.put(`${API}/${id}/status`, { status, reason: reason || '' });
       fetchBookings();
     } catch { alert('Server error.'); }
     finally { setActionLoading(null); }
@@ -161,8 +158,7 @@ const AdminDashboard = () => {
   };
   const handleDelete = async (id) => {
     if (!window.confirm(`Permanently delete booking ${id}?`)) return;
-    setActionLoading(id);
-    try { await fetch(`${API}/${id}`, { method: 'DELETE' }); fetchBookings(); }
+    try { await api.delete(`${API}/${id}`); fetchBookings(); }
     catch { alert('Delete failed.'); }
     finally { setActionLoading(null); }
   };

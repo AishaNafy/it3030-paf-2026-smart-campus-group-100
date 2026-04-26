@@ -4,7 +4,9 @@ import {
   Briefcase, Send, AlertCircle, BadgeInfo, AlertTriangle
 } from 'lucide-react';
 
-const API = 'http://localhost:8080/api/bookings';
+import api from '../../api/axiosConfig';
+
+const API = '/bookings';
 
 const inputClass =
   'w-full px-4 py-2.5 rounded-lg border border-gray-200 ' +
@@ -109,24 +111,17 @@ const BookingRequestPage = () => {
         attendees: parseInt(form.attendees, 10),
       };
 
-      const res  = await fetch(API, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
-      });
-      const data = await res.json();
+      const res  = await api.post(API, payload);
+      const data = res.data;
 
-      if (res.ok) {
-        setSuccess(`Booking ${data.id} submitted successfully! Status: PENDING review.`);
-        setForm(EMPTY_FORM);
-      } else if (res.status === 409) {
-        // Conflict — show the popup modal with the server's message
-        setConflictMsg(data.error || 'This location is already booked at the selected time.');
+      setSuccess(`Booking ${data.id} submitted successfully! Status: PENDING review.`);
+      setForm(EMPTY_FORM);
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setConflictMsg(err.response.data?.error || 'This location is already booked at the selected time.');
       } else {
-        setError(data.error || data.message || 'Submission failed. Please try again.');
+        setError(err.response?.data?.error || err.response?.data?.message || 'Submission failed. Please try again.');
       }
-    } catch {
-      setError('Cannot reach the server. Ensure Spring Boot is running on port 8080.');
     } finally {
       setLoading(false);
     }

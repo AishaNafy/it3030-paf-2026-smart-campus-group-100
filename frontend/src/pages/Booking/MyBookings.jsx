@@ -6,7 +6,9 @@ import {
   AlertTriangle, Save, History
 } from 'lucide-react';
 
-const API = 'http://localhost:8080/api/bookings';
+import api from '../../api/axiosConfig';
+
+const API = '/bookings';
 
 /* ─────────────────────────────────────────────────────────────────────
    NORMALIZER
@@ -221,15 +223,13 @@ const EditModal = ({ booking, onSave, onCancel }) => {
         studentId: form.studentId.trim().toUpperCase(),
         attendees: parseInt(form.attendees, 10),
       };
-      const res  = await fetch(`${API}/${booking.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (res.ok)             { onSave(normalizeBooking(data)); }
-      else if (res.status === 409) { setError(data.error || 'Time slot conflict.'); }
-      else                    { setError(data.error || 'Failed to save.'); }
-    } catch { setError('Cannot reach the server.'); }
+      const res  = await api.put(`${API}/${booking.id}`, payload);
+      const data = res.data;
+      onSave(normalizeBooking(data));
+    } catch (err) {
+      if (err.response?.status === 409) { setError(err.response.data?.error || 'Time slot conflict.'); }
+      else                    { setError(err.response?.data?.error || 'Failed to save.'); }
+    }
     finally { setSaving(false); }
   };
 
@@ -434,9 +434,8 @@ const DeletedLog = () => {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    fetch(`${API}/deleted`)
-      .then(r => r.json())
-      .then(d => setDeleted(Array.isArray(d) ? d.map(normalizeDeleted) : []))
+    api.get(`${API}/deleted`)
+      .then(res => setDeleted(Array.isArray(res.data) ? res.data.map(normalizeDeleted) : []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -509,13 +508,11 @@ const MyBookings = () => {
   const fetchBookings = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const params = new URLSearchParams();
-      if (filterStatus) params.append('status', filterStatus);
-      const res  = await fetch(`${API}?${params}`);
-      const data = await res.json();
-      // Normalise every booking so date/time are always plain strings
-      setBookings(Array.isArray(data) ? data.map(normalizeBooking) : []);
-    } catch {
+      const res = await api.get(API, {
+        params: { status: filterStatus }
+      });
+      setBookings(Array.isArray(res.data) ? res.data.map(normalizeBooking) : []);
+    } catch (err) {
       setError('Failed to load bookings. Ensure the server is running on port 8080.');
     } finally { setLoading(false); }
   }, [filterStatus]);
@@ -528,13 +525,9 @@ const MyBookings = () => {
   const performUpdate = async (id, status, reason = '') => {
     setActionLoading(id);
     try {
-      const res = await fetch(`${API}/${id}/status`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, reason }),
-      });
-      if (!res.ok) { const d = await res.json(); alert(d.error || 'Action failed.'); }
+      await api.put(`${API}/${id}/status`, { status, reason });
       fetchBookings();
-    } catch { alert('Server error. Please try again.'); }
+    } catch (err) { alert(err.response?.data?.error || 'Action failed.'); }
     finally { setActionLoading(null); }
   };
 
@@ -549,10 +542,7 @@ const MyBookings = () => {
     setDeleteTarget(null);
     setActionLoading(id);
     try {
-      await fetch(`${API}/${id}`, {
-        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
+      await api.delete(`${API}/${id}`, { data: { reason } });
       fetchBookings();
       setLogKey(k => k + 1);
     } catch { alert('Delete failed.'); }
