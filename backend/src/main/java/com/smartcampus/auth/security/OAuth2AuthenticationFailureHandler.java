@@ -24,7 +24,9 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
             HttpServletResponse response,
             AuthenticationException exception
     ) throws IOException, ServletException {
-        String encodedMessage = UriUtils.encode(exception.getMessage(), StandardCharsets.UTF_8);
+        String rawMsg = exception != null ? exception.getMessage() : "Unknown authentication error";
+        String message = rawMsg != null ? rawMsg : "Unknown authentication error";
+        String encodedMessage = UriUtils.encode(java.util.Objects.requireNonNull(message), java.util.Objects.requireNonNull(StandardCharsets.UTF_8));
         response.sendRedirect(frontendUrl + "/auth/callback?status=error&message=" + encodedMessage);
     }
 }

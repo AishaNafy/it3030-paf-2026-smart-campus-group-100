@@ -66,14 +66,14 @@ public class AppUserService {
         return appUserRepository.findAll();
     }
 
-    public void deleteUser(String id) {
+    public void deleteUser(@org.springframework.lang.NonNull String id) {
         if (!appUserRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found");
         }
         appUserRepository.deleteById(id);
     }
 
-    public AppUser updateUserRole(String id, Role newRole) {
+    public AppUser updateUserRole(@org.springframework.lang.NonNull String id, Role newRole) {
         AppUser user = appUserRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setRole(newRole);

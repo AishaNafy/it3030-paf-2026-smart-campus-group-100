@@ -46,7 +46,7 @@ public class UserManagementController {
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<?> updateUserRole(@PathVariable String id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> updateUserRole(@PathVariable @org.springframework.lang.NonNull String id, @RequestBody Map<String, String> body) {
         try {
             Role newRole = Role.valueOf(body.get("role").toUpperCase());
             AppUser user = appUserService.updateUserRole(id, newRole);
@@ -57,7 +57,7 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable @org.springframework.lang.NonNull String id) {
         appUserService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
