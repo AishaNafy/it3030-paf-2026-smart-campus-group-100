@@ -1,4 +1,4 @@
-package com.smartcampus.Booking;
+package com.smartcampus.booking;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

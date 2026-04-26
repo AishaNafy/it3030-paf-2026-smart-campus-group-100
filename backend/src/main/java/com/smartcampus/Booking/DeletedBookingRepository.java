@@ -1,4 +1,4 @@
-package com.smartcampus.Booking;
+package com.smartcampus.booking;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

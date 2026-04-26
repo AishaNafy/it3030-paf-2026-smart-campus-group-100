@@ -1,4 +1,4 @@
-package com.smartcampus.Booking;
+package com.smartcampus.booking;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import java.util.Map;
  * Converts ResponseStatusException (thrown by BookingService) into
  * well-structured JSON error responses that the React frontend can display.
  */
-@RestControllerAdvice(basePackages = "com.smartcampus.Booking")
+@RestControllerAdvice(basePackages = "com.smartcampus.booking")
 public class BookingExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)

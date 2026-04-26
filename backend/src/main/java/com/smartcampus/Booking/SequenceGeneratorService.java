@@ -1,4 +1,4 @@
-package com.smartcampus.Booking;
+package com.smartcampus.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
