@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Mail, Phone, MapPin, Calendar, Edit2, Save, X, Award, BookOpen } from 'lucide-react';
 import './StudentProfile.css';
 
