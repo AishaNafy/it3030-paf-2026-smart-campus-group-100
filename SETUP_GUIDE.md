@@ -5,7 +5,7 @@ This guide will walk you through setting up the Incident Ticket Management Syste
 
 ---
 
-## 1. Prerequisites (System Requirements)
+## 1. Prerequisites 
 
 Before starting, ensure that the following applications are installed on your machine:
 
