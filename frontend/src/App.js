@@ -15,6 +15,8 @@ import BookingAdminDashboard from './pages/Booking/AdminDashboard'; // Booking (
 import FacilityListPage from './pages/FacilityListPage';
 import FacilityDetailsPage from './pages/FacilityDetailsPage';
 import UserManagementPage from './pages/UserManagementPage';
+import AuthCallback from './pages/AuthCallback';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Student Routes */}
         <Route path="/student" element={<Layout role="STUDENT" />}>
@@ -33,6 +36,7 @@ function App() {
           <Route path="my-bookings" element={<MyBookings />} /> {/* Booking */}
           <Route path="facilities" element={<FacilityListPage />} />
           <Route path="facilities/:id" element={<FacilityDetailsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
 
         {/* Technician Routes - dashboard handles its own auth & layout */}
@@ -48,6 +52,7 @@ function App() {
           <Route path="manage-bookings" element={<BookingAdminDashboard />} /> {/* Booking */}
           <Route path="facilities" element={<FacilityListPage />} />
           <Route path="facilities/:id" element={<FacilityDetailsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
