@@ -30,14 +30,26 @@ public class TicketService {
         ticket.setStatus("Open");
         ticket.setCreatedAt(LocalDateTime.now());
         ticket.setUpdatedAt(LocalDateTime.now());
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        
+        // Notify Student of ticket creation
+        notificationService.createNotification(
+            saved.getCreatedBy(),
+            "Ticket Created",
+            "Your ticket '" + saved.getTitle() + "' has been successfully submitted.",
+            NotificationType.TICKET_STATUS_CHANGE,
+            "TICKET",
+            saved.getId()
+        );
+        
+        return saved;
     }
 
-    public Ticket getTicketById(String id) {
+    public Ticket getTicketById(@org.springframework.lang.NonNull String id) {
         return ticketRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
     }
 
-    public Page<Ticket> getTickets(String status, String priority, String category, String createdBy, String assignedTo, Pageable pageable) {
+    public Page<Ticket> getTickets(String status, String priority, String category, String createdBy, String assignedTo, @org.springframework.lang.NonNull Pageable pageable) {
         Query query = new Query();
         
         if (status != null && !status.isEmpty()) {
@@ -64,7 +76,7 @@ public class TicketService {
         return new PageImpl<>(tickets, pageable, count);
     }
 
-    public Ticket updateTicket(String id, Ticket ticketDetails) {
+    public Ticket updateTicket(@org.springframework.lang.NonNull String id, Ticket ticketDetails) {
         Ticket ticket = getTicketById(id);
         
         String oldStatus = ticket.getStatus();
@@ -87,7 +99,7 @@ public class TicketService {
         // 1. Notify Student if status changed
         if (updated.getStatus() != null && !updated.getStatus().equals(oldStatus)) {
             notificationService.createNotification(
-                updated.getEmail(),
+                updated.getCreatedBy(),
                 "Ticket Status Updated",
                 "Your ticket '" + updated.getTitle() + "' is now " + updated.getStatus(),
                 NotificationType.TICKET_STATUS_CHANGE,
@@ -114,7 +126,7 @@ public class TicketService {
         return updated;
     }
 
-    public void deleteTicket(String id) {
+    public void deleteTicket(@org.springframework.lang.NonNull String id) {
         ticketRepository.deleteById(id);
     }
 }
