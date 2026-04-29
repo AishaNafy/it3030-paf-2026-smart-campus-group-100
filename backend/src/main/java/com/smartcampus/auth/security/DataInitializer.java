@@ -70,35 +70,35 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("[DataInitializer] Admin user prepared: " + email);
         }
 
-        // ── 2. Sample Student User ───────────────────────────────────
-        String studentEmail = "student@gmail.com";
-        if (appUserRepository.findByEmail(studentEmail).isEmpty()) {
-            AppUser student = new AppUser();
-            student.setEmail(studentEmail);
-            student.setName("John Student");
-            student.setPhoneNumber("0771234567");
-            student.setNic("200012345678");
-            student.setPasswordHash(passwordEncoder.encode("Student@123"));
-            student.setRole(Role.STUDENT);
-            student.setCreatedAt(LocalDateTime.now());
-            appUserRepository.save(student);
-            System.out.println("[DataInitializer] Sample student created: " + studentEmail);
-        }
+                // ── 2. Sample Student User (seeded for README test accounts) ───
+                String studentEmail = "hirusha@gmail.com";
+                if (appUserRepository.findByEmail(studentEmail).isEmpty()) {
+                        AppUser student = new AppUser();
+                        student.setEmail(studentEmail);
+                        student.setName("Hirusha Student");
+                        student.setPhoneNumber("0771234567");
+                        student.setNic("200012345678");
+                        student.setPasswordHash(passwordEncoder.encode("12345678"));
+                        student.setRole(Role.STUDENT);
+                        student.setCreatedAt(LocalDateTime.now());
+                        appUserRepository.save(student);
+                        System.out.println("[DataInitializer] Sample student created: " + studentEmail);
+                }
 
-        // ── 3. Sample Technician User ────────────────────────────────
-        String techEmail = "technician@gmail.com";
-        if (appUserRepository.findByEmail(techEmail).isEmpty()) {
-            AppUser tech = new AppUser();
-            tech.setEmail(techEmail);
-            tech.setName("Mike Technician");
-            tech.setPhoneNumber("0779876543");
-            tech.setNic("199812345678");
-            tech.setPasswordHash(passwordEncoder.encode("Tech@123"));
-            tech.setRole(Role.TECHNICIAN);
-            tech.setCreatedAt(LocalDateTime.now());
-            appUserRepository.save(tech);
-            System.out.println("[DataInitializer] Sample technician created: " + techEmail);
-        }
+                // ── 3. Sample Technician User (seeded for README test accounts) ─
+                String techEmail = "aisha@gmail.com";
+                if (appUserRepository.findByEmail(techEmail).isEmpty()) {
+                        AppUser tech = new AppUser();
+                        tech.setEmail(techEmail);
+                        tech.setName("Aisha Technician");
+                        tech.setPhoneNumber("0779876543");
+                        tech.setNic("199812345678");
+                        tech.setPasswordHash(passwordEncoder.encode("aisha123"));
+                        tech.setRole(Role.TECHNICIAN);
+                        tech.setCreatedAt(LocalDateTime.now());
+                        appUserRepository.save(tech);
+                        System.out.println("[DataInitializer] Sample technician created: " + techEmail);
+                }
 
         // ── 4. Sample Tickets ────────────────────────────────────────
         ticketRepository.deleteAll();
