@@ -16,10 +16,10 @@ The **Smart Campus Operations Hub** is a centralized management system designed 
 
 | Name | Student ID | Contribution |
 |---|---|---|
-| Member 1 | ITXXXXXXX | Resource Management |
-| Member 2 | ITXXXXXXX | Booking Management |
-| Member 3 | ITXXXXXXX | Incident Ticketing |
-| Member 4 | ITXXXXXXX | Notifications + OAuth |
+| Member 1 | IT23334410 | Resource Management |
+| Member 2 | IT23317758 | Booking Management |
+| Member 3 | IT23321236 | Incident Ticketing |
+| Member 4 | IT23317826 | Notifications + OAuth |
 
 ---
 
